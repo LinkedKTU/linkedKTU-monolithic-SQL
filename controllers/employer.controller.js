@@ -143,4 +143,9 @@ const createEmployer = async (req, res, next) => {
     );
 };
 
-module.exports = { getEmployers, getEmployerById, createEmployer, login };
+module.exports = { 
+    getEmployers, 
+    getEmployerById, 
+    createEmployer, 
+    login 
+};

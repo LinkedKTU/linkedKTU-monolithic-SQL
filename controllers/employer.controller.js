@@ -49,10 +49,8 @@ const login = async (req, res, next) => {
 };
 
 const getEmployers = async (req, res, next) => {
-    let employers;
-
     try {
-        employers = await getAll(Employer.name);
+        var employers = await getAll(Employer.name);
     } catch (error) {
         return next(new ApiError(error.message, httpStatus.NOT_FOUND));
     }
@@ -98,37 +96,13 @@ const getEmployerById = async (req, res, next) => {
 };
 
 const createEmployer = async (req, res, next) => {
-    const {
-        email,
-        password,
-        fullname,
-        description,
-        image,
-        phone,
-        address,
-        isInternshipRemote,
-        isWorkRemote,
-        city,
-    } = req.body;
-
     const employerData = {
         ID: uuidv4(),
-        Email: email,
-        Password: password,
-        Fullname: fullname,
-        Description: description,
-        Image: image,
-        Phone: phone,
-        Address: address,
-        IsInternshipRemote: isInternshipRemote,
-        IsWorkRemote: isWorkRemote,
-        City: city,
+       ...req.body
     };
 
-    let employer;
-
     try {
-        employer = await create(Employer.name, employerData);
+        var employer = await create(Employer.name, employerData);
     } catch (error) {
         return next(new ApiError(error.message, httpStatus.NOT_FOUND));
     }
@@ -143,4 +117,67 @@ const createEmployer = async (req, res, next) => {
     );
 };
 
-module.exports = { getEmployers, getEmployerById, createEmployer, login };
+const updateEmployerById = async (req, res, next) => {
+    const { id } = req.params;
+
+    const updatedEmployerData = {};
+
+    let entries = Object.entries(req.body);
+
+    for (const [key, value] of entries) {
+        if (value) {
+            updatedEmployerData[key] = value;
+        }
+    }
+
+    try {
+        var updatedEmployer = await update(Employer.name, id, updatedEmployerData);
+    } catch (error) {
+        return next(new ApiError(error.message, httpStatus.NOT_FOUND));
+    }
+
+    if (!updatedEmployer || updatedEmployer[0].length === 0) {
+        return next(
+            new ApiError(
+                `There are no employers with this id: ${id}`,
+                httpStatus.BAD_REQUEST
+            )
+        );
+    }
+
+    ApiDataSuccess.send(
+        `Employer ${id} updated successfully!`,
+        httpStatus.OK,
+        res,
+        updatedEmployer[0]
+    );
+};
+
+const deleteEmployerById = async (req, res, next) => {
+    const { id } = req.params;
+
+    try {
+        const deletedEmployer = await deleteById(Employer.name, id);
+        
+        if (!deletedEmployer || deletedEmployer[0].length === 0) {
+            return next(
+                new ApiError(
+                    `There are no employers with this id: ${id}`,
+                    httpStatus.BAD_REQUEST
+                )
+            );
+        }
+
+        ApiDataSuccess.send(
+            `Employer ${id} deleted successfully!`,
+            httpStatus.OK,
+            res
+        );
+    } catch (error) {
+        return next(new ApiError(error.message, httpStatus.NOT_FOUND));
+    }
+};
+
+module.exports = { getEmployers, getEmployerById, createEmployer, updateEmployerById, deleteEmployerById, login };
+
+

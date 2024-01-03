@@ -49,19 +49,6 @@ const login = async (req, res, next) => {
 };
 
 const createStudent = async (req, res, next) => {
-    const {
-        email,
-        password,
-        fullname,
-        description,
-        image,
-        phone,
-        address,
-        school,
-        city,
-        contactmail,
-    } = req.body;
-
     let student;
     try {
         student = await getOneByQuery(Student.name, 'Email', email);
@@ -69,27 +56,20 @@ const createStudent = async (req, res, next) => {
         return next(new ApiError(error.message, httpStatus.NOT_FOUND));
     }
 
-    if (!student[0].length === 0) {
+    // TODO theese should be updated after db connection
+    if (student && (!student[0])) {
         return next(
             new ApiError('This email already in use!', httpStatus.BAD_REQUEST)
         );
-    }
+    } 
 
     const studentPassword = (await passwordHelper.passwordToHash(password))
         .hashedPassword;
 
     const studentData = {
         ID: uuidv4(),
-        Email: email,
         Password: studentPassword,
-        Fullname: fullname,
-        Description: description,
-        Image: image,
-        Phone: phone,
-        Address: address,
-        School: school,
-        City: city,
-        ContactMail: contactmail,
+        ...req.body,
     };
 
     sendEmail(email, fullname, studentPassword);

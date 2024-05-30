@@ -7,11 +7,18 @@ const passwordToHash = async (plainPassword) => {
     // ? Hash Password With Salt
     const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
-    return {
-        hashedPassword,
-    };
+    return  hashedPassword;
+  
+};
+
+const comparePassword =  async (comingPassword, passwordFromDB) => {
+    console.log('comingPassword: ',comingPassword );
+    console.log(passwordFromDB);
+
+    return bcrypt.compare(comingPassword,passwordFromDB );
 };
 
 module.exports = {
     passwordToHash,
+    comparePassword
 };

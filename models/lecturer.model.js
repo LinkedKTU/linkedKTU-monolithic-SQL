@@ -1,18 +1,44 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../scripts/helpers/sequelize.helper');
-const BaseUser = require('./base-user.model');
 const Student = require('./student.model');
 
 const Lecturer = sequelize.define(
     'Lecturer',
     {
-        approvedStudents: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-            references: {
-                model: Student,
-                key: 'id',
-            },
+        _id: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        phone: {
+            type: DataTypes.STRING,
+        },
+        address: {
+            type: DataTypes.STRING,
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        image: {
+            type: DataTypes.STRING,
+        },
+        accountType: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+      
     },
     {
         charset: 'utf8',
@@ -20,7 +46,7 @@ const Lecturer = sequelize.define(
     },
     {
         hasMany: Student,
-        parent: BaseUser,
+        
     },
 );
 

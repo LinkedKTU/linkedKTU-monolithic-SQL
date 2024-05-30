@@ -1,108 +1,21 @@
 const httpStatus = require('http-status');
-const bcrypt = require('bcryptjs');
+
 const ApiError = require('../scripts/responses/error/api-error');
 const ApiDataSuccess = require('../scripts/responses/success/api-data-success');
 const {
-    getOneByQuery,
+    
     getAll,
     getOneById,
     getAllByQuery,
-    create,
-    sendEmail,
+    runQuery,
+
 } = require('../services/base-service');
-const { createLoginToken } = require('../scripts/helpers/jwt.helper');
+
 const Student = require('../models/student.model');
-const passwordHelper = require('../scripts/helpers/password.helper');
-const { v4: uuidv4 } = require('uuid');
+const Approval = require('../models/approval.model');
 
-const login = async (req, res, next) => {
-    const student = await getOneByQuery(Student.name, {
-        email: req.body.email,
-    });
 
-    if (student <= 0) {
-        return next(
-            new ApiError(
-                'Email or password is incorrect',
-                httpStatus.BAD_REQUEST
-            )
-        );
-    }
 
-    const validPassword = await bcrypt.compare(
-        req.body.password,
-        student.password
-    );
-
-    if (!validPassword) {
-        return next(
-            new ApiError(
-                'Email or password is incorrect',
-                httpStatus.BAD_REQUEST
-            )
-        );
-    }
-
-    const access_token = createLoginToken(student, res);
-
-    ApiDataSuccess.send('Login succesfull', httpStatus.OK, res, access_token);
-};
-
-const createStudent = async (req, res, next) => {
-    const {
-        email,
-        password,
-        fullname,
-        description,
-        image,
-        phone,
-        address,
-        school,
-        city,
-        contactmail,
-    } = req.body;
-
-    let student;
-    try {
-        student = await getOneByQuery(Student.name, 'Email', email);
-    } catch (error) {
-        return next(new ApiError(error.message, httpStatus.NOT_FOUND));
-    }
-
-    if (!student[0].length === 0) {
-        return next(
-            new ApiError('This email already in use!', httpStatus.BAD_REQUEST)
-        );
-    }
-
-    const studentPassword = (await passwordHelper.passwordToHash(password))
-        .hashedPassword;
-
-    const studentData = {
-        ID: uuidv4(),
-        Email: email,
-        Password: studentPassword,
-        Fullname: fullname,
-        Description: description,
-        Image: image,
-        Phone: phone,
-        Address: address,
-        School: school,
-        City: city,
-        ContactMail: contactmail,
-    };
-
-    sendEmail(email, fullname, studentPassword);
-
-    const createdStudent = await create(Student.name, studentData);
-
-    ApiDataSuccess.send(
-        'Student created succesfully!',
-        httpStatus.OK,
-        res,
-        createdStudent
-    );
-};
 
 const getStudents = async (req, res, next) => {
     let result;
@@ -112,12 +25,15 @@ const getStudents = async (req, res, next) => {
     } catch (error) {
         return next(new ApiError(error.message, httpStatus.NOT_FOUND));
     }
+    console.log(result);
 
-    if (!result[0].length === 0) {
+    if (!result && !result[0].length === 0) {
         return next(
             new ApiError('There have been an error', httpStatus.BAD_REQUEST)
         );
     }
+    
+
 
     ApiDataSuccess.send(
         'Students fetched succesfully',
@@ -185,10 +101,68 @@ const getStudentsByTechnology = async (req, res, next) => {
     );
 };
 
+const approveStudent = async (req, res, next) => {
+    const { 
+        studentId, 
+        lecturerId
+    } = req.body;
+
+    try {
+        const existingApproval = await runQuery(
+            `SELECT * FROM \`bitirme\`.\`${Approval.name}\` 
+            WHERE studentId = '${studentId}' 
+            AND lecturerId = '${lecturerId}';`
+
+        ); 
+   
+
+        if (existingApproval && existingApproval[0].length !== 0 
+        && existingApproval[0].length > 0
+        ) {
+        
+            await runQuery(
+                `DELETE FROM ${Approval.name} 
+                WHERE studentId = '${studentId}' 
+                AND lecturerId = '${lecturerId}'`
+            );
+
+            ApiDataSuccess.send(
+                'Student has been disapproved',
+                httpStatus.OK,
+                res
+            );
+        
+        }
+
+        else {
+            await runQuery(
+                `INSERT INTO ${Approval.name} 
+                (studentId, lecturerId, createdAt, updatedAt) 
+            VALUES ('${studentId}', '${lecturerId}', NOW(), NOW())`
+            );
+
+            ApiDataSuccess.send(
+                'Student has been approved',
+                httpStatus.OK,
+                res
+            );
+
+        }
+    }
+    catch (error) {
+        return next(new ApiError(error.message, 
+            httpStatus.INTERNAL_SERVER_ERROR));
+        
+    }
+};
+
+
+    
+
 module.exports = {
-    login,
     getStudents,
     getStudentById,
     getStudentsByTechnology,
-    createStudent,
+    approveStudent
+
 };

@@ -34,6 +34,7 @@ app.use('/students', routes.student);
 app.use('/lecturers', routes.lectuter);
 app.use('/employers', routes.employer);
 app.use('/posts', routes.post);
+app.use('/auth', routes.auth);
 
 app.use(errorHandler);
 

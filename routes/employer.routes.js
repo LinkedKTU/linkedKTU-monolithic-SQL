@@ -6,8 +6,4 @@ router.route('/').get(employerController.getEmployers);
 
 router.route('/:id').get(employerController.getEmployerById);
 
-router.route('/auth/register').post(employerController.createEmployer);
-
-router.route('/auth/login').post(employerController.login);
-
 module.exports = router;

@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const lecturerController = require('../controllers/lecturer.controller');
 
-router.get('/', (req, res) => {
-    res.status(200).json(
-        {
-            lecturerName: 'Mustafa Ulutaş',
-        },
-    );
-});
+router.route('/').get(lecturerController.getLecturers);
+
+router.route('/:id').get(lecturerController.getLecturerById);
+
 
 module.exports = router;

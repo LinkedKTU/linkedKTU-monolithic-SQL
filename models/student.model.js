@@ -1,59 +1,74 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../scripts/helpers/sequelize.helper');
-const BaseUser = require('./base-user.model');
-const Post = require('./post.model');
-const JobPost = require('./job-post.model');
-const Lecturer = require('./lecturer.model');
+
+
+
 
 const Student = sequelize.define(
-    'Student',
+    'Students',
     {
+        _id: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            primaryKey: true,
+            unique: true,
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        phone: {
+            type: DataTypes.STRING,
+        },
+        address: {
+            type: DataTypes.STRING,
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        image: {
+            type: DataTypes.STRING,
+        },
+        accountType: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+
         school: {
             type: DataTypes.STRING,
-            allowNull: false,
+         
         },
         city: {
-            type: DataTypes.STRING,
-            allowNull: false,
+            type: DataTypes.STRING, 
+     
         },
         technologies: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-            allowNull: false,
+            type: DataTypes.JSON, // TODO: JSON.toString()
+      
         },
         languages: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-        },
-        experience: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-            references: {
-                model: Post,
-                key: 'id',
-            },
-        },
-        appliedJobs: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-            references: {
-                model: JobPost,
-                key: 'id',
-            },
-        },
-        lecturersThatApproved: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-            references: {
-                model: Lecturer,
-                key: 'id',
-            },
-        },
+            type: DataTypes.JSON, // TODO: JSON.toString()
+        }
+        
+        
+        
     },
     {
         charset: 'utf8',
         collate: 'utf8_unicode_ci',
-        freezeTableName: true
+      
     },
-    {
-        parent: BaseUser,
-        hasMany: Post,JobPost,Lecturer
-    },
+    
 );
+
 
 module.exports = Student;
